@@ -29,11 +29,11 @@ main:
 
     li      $v0, 1
     move    $a0, $s3
-    syscall
+    syscall #imprime o resultado
 
     li      $v0, 4
     la      $a0, newLine
-    syscall
+    syscall #imprime um \n
 
     li      $v0, 10
-    syscall
+    syscall #encerra o programa
