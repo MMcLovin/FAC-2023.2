@@ -1,0 +1,88 @@
+.data
+    newLine:    .asciiz     "\n" 
+    prompt:      .asciiz     "numero lido = "
+.text
+main:
+    #n linhas a serem lidas
+    li      $v0, 5
+    syscall
+    move    $s0, $v0        
+    
+    #contador i
+    add     $t0, $zero, $zero      
+    
+    jal Loop
+
+    #encerra o programa
+    li      $v0, 10
+    syscall        
+
+Loop:
+    #se i == linhas, sai do loop
+    beq     $t0, $s0, exit  
+
+    #le o primeiro "boolean", 1 = false, 2 = true
+    li      $v0, 12
+    syscall
+    move    $s1, $v0   
+    addi    $s1, $s1, -48
+   
+    #le o espaco em branco 
+    li      $v0, 12
+    syscall  
+
+    #le o segundo "boolean", 1 = false, 2 = true
+    li      $v0, 12
+    syscall
+    move    $s2, $v0  
+    addi    $s2, $s2, -48
+    
+    #se os dois forem diferentes, a soma eh 3, caso contrario, sao iguais
+    addi    $t2, $zero, 3
+    add     $t1, $s1, $s2
+    beq     $t1, $t2, verdadeiro
+
+    j falso
+
+exit:
+    #volta pra main
+    jr      $ra              
+
+verdadeiro:
+    #imprime 2 (verdadeiro)
+    li      $v0, 1
+    addi     $a0, $zero, 2
+    syscall      
+
+    li      $v0, 4
+    la      $a0, newLine
+    syscall
+
+    #limpa o buffer
+    li      $v0, 12
+    syscall  
+
+    #incrementa o contador do Loop 
+    addi    $t0, $t0, 1      
+
+    #volta ao inicio do Loop
+    j Loop                   
+falso:
+    #imprime 1 (falso)
+    li      $v0, 1
+    addi     $a0, $zero, 1
+    syscall                  
+
+    li      $v0, 4
+    la      $a0, newLine
+    syscall
+
+    #limpa o buffer
+    li      $v0, 12
+    syscall  
+
+    #incrementa o contador do Loop 
+    addi    $t0, $t0, 1
+
+    #volta ao inicio do Loop 
+    j Loop                  
