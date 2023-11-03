@@ -1,0 +1,43 @@
+.data
+newLine:    .asciiz     "\n"
+.text
+
+main:
+    #inicia $a0 
+    addiu    $a0, $zero, 9000
+
+contaBits:
+    #faz uma copia do valor em $a0
+    addu     $t0, $a0, $zero
+    
+    #se $a0 for zero, nao ha mais bits 1 para contar
+    beq     $t0, $zero, Exit
+
+    #fazendo um and com a copia de $a0, pegamos o valor do bit menos significativo
+    andi    $t0, $t0, 1    
+
+    #"deletamos" o bit menos significativo que acobu de ser contado
+    srl     $a0, $a0, 1
+
+    #se ele for 0, volta pro loop
+    beq     $t0, $zero, contaBits
+
+    #se for 1, jogamos no $v0
+    addiu    $s0, $s0, 1
+
+    #repete :)
+    j contaBits
+
+Exit:
+    #imprime resultado
+    li      $v0, 1
+    addu    $a0, $s0, $zero
+    syscall
+
+    #imprime "\n"
+    li      $v0, 4
+    la      $a0, newLine
+    syscall
+
+    #volta pra main
+    jr      $ra
