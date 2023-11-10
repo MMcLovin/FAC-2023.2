@@ -1,0 +1,109 @@
+.data
+ newLine:   .asciiz     "\n"
+ stackElement:      .asciiz     "Elemento da stack = "
+ .text
+main:
+    # num ele        1 2 3 4 5 6 7 8 9 10
+    # teste = 1 1 2 2 5 5 5 5 7 8
+    
+    addi    $sp, $sp, -40
+    #v[10] 
+    addi    $t1, $zero, 8
+    sw      $t1, 40($sp)
+    #v[9] 
+    addi    $t1, $zero, 7
+    sw      $t1, 36($sp)
+    #v[8]  
+    addi    $t1, $zero, 7
+    sw      $t1, 32($sp)
+    #v[7]  
+    addi    $t1, $zero, 5
+    sw      $t1, 28($sp)
+    #v[6]  
+    addi    $t1, $zero, 5
+    sw      $t1, 24($sp)
+    #v[5]  
+    addi    $t1, $zero, 5
+    sw      $t1, 20($sp)
+    #v[4]  
+    addi    $t1, $zero, 0
+    sw      $t1, 16($sp)    
+    #v[3]  
+    addi    $t1, $zero, -1
+    sw      $t1, 12($sp)
+    #v[2]  
+    addi    $t1, $zero, -50
+    sw      $t1, 8($sp)
+    #v[1]  
+    addi    $t1, $zero, -50
+    sw      $t1, 4($sp)
+    #v[0]  
+    addi    $t1, $zero, -50
+    sw      $t1, 0($sp)
+    
+    #numero de elementos
+    addi    $a1, $zero, 11
+
+    jal elemDistintos
+
+    #ends the program
+    li      $v0, 10
+    syscall
+
+elemDistintos:
+    #inicializa o numero de elementos distintos
+    #ha, necessariamente
+    add    $s0, $zero, $zero
+
+    #carrega o maior inicial
+    addi    $s1, $zero, -32768
+
+Loop:
+    #a1 = numero de elmentos, que eh decrementado a cada loop
+    beq     $a1, $zero, Exit
+
+    #pega o elemento a partir do endereco base previo
+    lw      $t0, 0($sp)
+
+    #--------------------------------------
+    li      $v0, 4
+    la      $a0, stackElement
+    syscall
+    li      $v0, 1
+    add     $a0, $zero, $t0
+    syscall
+    li      $v0, 4
+    la      $a0, newLine
+    syscall
+    #--------------------------------------
+    add     $sp, $sp, 4
+    #verifica se o elemento eh menor que o maior previamente salvo em $s1
+    slt     $t1, $s1, $t0
+    bne     $t1, $zero, mudaMaior
+    
+    #diminui o numero de elementos restantes 
+    addi    $a1, $a1, -1
+
+    j Loop
+
+Exit:
+    #imprime o numero de elementos distintos e um "\n"
+    li      $v0, 1
+    add     $a0, $zero, $s0
+    syscall
+    li      $v0, 4
+    la      $a0, newLine
+    syscall
+
+    jr      $ra
+
+mudaMaior:
+    #salva o novo maior
+    add     $s1, $t0, $zero
+    
+    #diminui o numero de elementos restantes 
+    addi    $a1, $a1, -1
+
+    #incrementa os numeros distintos
+    addi    $s0, $s0, 1
+    j Loop
