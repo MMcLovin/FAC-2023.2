@@ -1,0 +1,76 @@
+multfac:
+    #produto = HI && LO
+    mthi    $zero               #P[64...32] = 0
+    mtlo    $a1                 #P[31...0]  = Q
+
+    li      $s0, 32             #representa as iteracoes do meu Loop
+    
+    xor     $a3, $a0, $a1                      #salva o resultado da comparacao de sinais. $a3 == 0 sinais iguais e resultado positivo, $a3 != 0, sinais diferentes e resultado negativo
+    slt     $a3, $a3, $zero
+
+siganlCheck1:
+    xor     $t0, $a0, $zero                     #$t0 nos diz se $a0 eh positivo ou negativo ($zero = positivo)
+    slt     $t0, $t0, $zero                     #se $t0 < 0, $a0 eh negativo e $t0 assume 1
+    beq     $t0, $zero, siganlCheck2            #se $a0 for positivo, vamos para a proxima checagem
+    nor     $a0, $a0, $zero                     #Not (or $zero) = negacao de $a0
+    addi    $a0, $a0, 1                         #Negacao de $a0 + 1 = equivalente positivo
+siganlCheck2:
+    xor     $t0, $a1, $zero                     #$t0 nos diz se $a1 eh positivo ou negativo ($zero = positivo)
+    slt     $t0, $t0, $zero                     #se $t0 < 0, $a0 eh negativo e $t0 assume 1
+    beq     $t0, $zero, Loop                    #se $a1 for negativo, vamos passar para positivo
+    nor     $a1, $a1, $zero                     #Not (or $zero) = negacao de $a1
+    addi    $a1, $a1, 1                         #Negacao de $a1 + 1 = equivalente positivo
+    mtlo    $a1                                 #atualiza P[31...0] = Q
+   
+Loop:
+    beq     $s0, 0, signalChange                #fizemos 32 iteracoes, acabou-se o q era doce
+    
+    addi    $s0, $s0, -1                #decrementa minhas iteracoes restantes
+    
+    mflo    $t1                         #pega a parte do produto em lo
+    mfhi    $t2                         #pega a parte do produto em hi
+
+    andi    $t0, $t1, 1                 #pega o ultimo bit de lo (P[0]) para decidimos se realiza ou nao uma soma no hi
+
+    beq     $t0, $zero, shiftProduct    #nao realiza a soma de M (multiplicando), em hi, se P[0] == 0
+Sum:    
+    mfhi    $t0                         #carrega o conteudo de hi
+    add     $t0, $t0, $a0               #P[64...32] = P[64...32] + M
+    mthi    $t0                         #guarda de volta em hi o valor da soma
+shiftProduct:
+    mfhi    $t0                         #carrega conteudo de hi
+    andi    $t0, $t0, 1                 #pega o ultimo bit de hi (P[32]) para decidimos se passa "1" para lo ou nao
+
+    #desloca P uma casa para a direita
+    mfhi    $t1                         #carrega a parte do produto em hi
+    mflo    $t2                         #carrega a parte do produto em lo
+    srl     $t1, $t1, 1                 #desloca valor em hi para a direita, como salvamos P[32], nao ha problema
+    srl     $t2, $t2, 1                 #desloca valor em lo para a direita
+    mthi    $t1                         #guarda valor deslocado
+    mtlo    $t2                         #guarda valor deslocado
+    
+    beq     $t0, $zero, Loop
+
+transferLO:
+    mflo    $t0                         #carrega o conteudo de lo
+    ori     $t0, $t0, 2147483648        #2147483648 = 2^31 = 1000...0, bota um "1" em P[31]
+    mtlo    $t0                         #guarda conteudo em lo
+    j Loop
+
+signalChange:
+    bne     $a3, $zero, complementOf2    #pega o equivalente negativo em complemento de 2
+
+exit:
+    jr      $ra
+
+complementOf2:
+    mfhi    $t0                          #carrega a parte do produto em hi
+    nor     $t0, $t0, $zero              #pega a negacao desse valor
+    mthi    $t0                          #bota a negacao em hi
+
+    mflo    $t1                          #carrega a parte do produto em lo
+    nor     $t1, $t1, $zero              #pega a negacao desse valor
+    addi    $t1, $t1, 1                  #soma 1 e obtem o complemento de 2
+    mtlo    $t1                          #bota o complemento de 2 em lo
+
+    j       exit
