@@ -48,10 +48,10 @@ contaAcertos:
     lb      $t1, 0($t1)
     lb      $t2, 0($t2)
 
-    #passa para a prox questao
+    #passa para o endereco da prox questao
     addi    $t0, $t0, 1
 
-    #se sao diferentes, so vai para a proxima iteracao
+    #se sao diferentes, vai para a proxima iteracao
     bne     $t1, $t2, contaAcertos
 
     #sao iguais, incrementa o numero de acertos
