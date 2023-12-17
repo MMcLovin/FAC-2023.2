@@ -1,0 +1,80 @@
+.data
+newLine:    .asciiz     "\n"
+voo:        .space      8
+.text
+main:
+leVoo:
+    #le a string dos voos de origem e destino
+    li      $v0, 8
+    la      $a0, voo
+    li      $a1, 7
+    syscall
+
+    la      $t3, voo 
+aeroportoOrigem:
+    lb      $t0, 0($t3)                 #le o primeiro char
+    addi    $t0, $t0, -48               #passa pra decimal
+
+    addi    $t4, $zero, 32              #numero ASCII do espaco em branco    
+    addi    $t5, $zero, 10              #numero ASCII do line feed
+
+    addi    $t3, $t3, 1                 #endereco do voo++
+    lb      $t2, 0($t3)                 #le o segundo digito  
+
+    beq     $t2, $t4, aeroportoDestino  #se for um espaco em branco, vamos pro prox voo
+    
+    addi    $t2, $t2, -48               #nao eh um espaco em branco, passa pra decimal
+ 
+    mul     $t0, $t0, 10                #multiplica pelo peso 10^1
+    add     $t0, $t0, $t1               #d1*10^1 + d1*10^0 = numero de dois digitos do voo
+
+    addi    $t3, $t3, 1                 #endereco do voo++
+    lb      $t2, 0($t3)                 #carrega um byte
+        
+    beq     $t2, $t4, aeroportoDestino  #se for um espaco em branco, parte pro prox voo
+    addi    $t0, $zero, 100             #se nao for um espaco, eh o aeroporto de numero 100
+
+    addi    $t3, $t3, 1                 #endereco do voo++, pulando o espaco em branco
+
+aeroportoDestino:
+    addi    $t3, $t3, 1                 #endereco do voo++
+
+    lb      $t1, 0($t3)                 #le o primeiro char apos o espaco
+    addi    $t1, $t1, -48               #passa pra decimal
+
+    addi    $t3, $t3, 1                 #endereco do voo++
+    lb      $t2, 0($t3)                 #le o segundo digito apos o espaco
+    beq     $t2, $zero, imprime         #se for o null, cabou-se o que era doce
+    beq     $t2, $t5, imprime           #se for um line feed, vamos pro prox voo
+    addi    $t2, $t2, -48               #passa pra decimal
+
+    mul     $t1, $t1, 10                #multiplica pelo peso 10^1
+    add     $t1, $t1, $t2               #d1*10^1 + d1*10^0 = numero de dois digitos do voo
+
+    addi    $t3, $t3, 1                 #endereco do voo++
+    lb      $t2, 0($t3)                 #le o terceiro digito apos o espaco
+    beq     $t2, $zero, imprime         #se for o null, cabou-se o que era doce
+    beq     $t2, $t5, imprime           #se for um line feed, vamos pro prox voo
+
+    add     $t1, $zero, 100
+
+imprime:
+
+    li      $v0, 1
+    add     $a0, $zero, $t0
+    syscall
+
+    li      $v0, 4
+    la      $a0, newLine
+    syscall
+
+    li      $v0, 1
+    add     $a0, $zero, $t1
+    syscall
+
+    li      $v0, 4
+    la      $a0, newLine
+    syscall
+
+    li      $v0, 10
+    syscall
